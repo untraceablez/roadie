@@ -89,7 +89,12 @@ npm run dev              # run the bot
 
 For a long-running deployment:
 
-- **Docker:** `docker compose up -d --build`. Reads `.env`, keeps the SQLite database in a named volume. Run `npm run deploy-commands` once (on the host or in a one-off container) before first use.
+- **Docker:** the container runs as an unprivileged user and stores its SQLite database in `/data`.
+  - Published image: `docker compose pull && docker compose up -d` uses `ghcr.io/untraceablez/roadie:latest` with the values in `.env`.
+  - Build it yourself instead: `docker compose up -d --build`.
+  - Using your own uid/gid? Set `user:` in compose and make sure the mounted data directory is writable by it, or SQLite fails with `unable to open database file`.
+  - Slash commands are registered globally on Discord's side, so you only need `npm run deploy-commands` once (from any machine with the repo and your `.env`), and again if the command definitions change.
+  - On Unraid? See [Running on Unraid](#running-on-unraid).
 - **Plain Node:** `npm run build && npm start`, under a process manager such as systemd or pm2.
 
 #### Environment reference
@@ -115,6 +120,24 @@ Variables already set in your shell take precedence over `.env`.
 
 The first poll after setup silently records existing shows so the channel isn't flooded. After that, only newly listed shows are announced.
 
+## Running on Unraid
+
+`docker-compose.unraid.yml` is a ready-made compose file: it pulls the published image, runs as Unraid's `nobody:users` (99:100), keeps the database in appdata, and drops all Linux capabilities.
+
+1. **Get the image.** The published image lives at `ghcr.io/untraceablez/roadie`. If you fork the repo, the included `docker.yml` workflow publishes your own to `ghcr.io/<you>/roadie`; edit the `image:` line to match. A newly published package is private by default, so on GitHub open your profile → **Packages** → `roadie` → **Package settings** → **Change visibility** → **Public**. (Alternatively, `docker login ghcr.io` on the server with a personal access token that has `read:packages`.)
+2. **Create the data directory** with the ownership the container expects. From the Unraid terminal:
+
+   ```bash
+   mkdir -p /mnt/user/appdata/roadie/data
+   chown 99:100 /mnt/user/appdata/roadie/data
+   ```
+
+3. **Add the stack.** With the **Docker Compose Manager** plugin (from Community Applications), add a new stack named `roadie`, paste in the contents of `docker-compose.unraid.yml`, and use the plugin's env-file editor to create the stack's `.env` with your values (see [Environment reference](#environment-reference)). Menu labels vary slightly between plugin versions. Without the plugin, over SSH: put `docker-compose.unraid.yml` (renamed `docker-compose.yml`) and your `.env` in `/mnt/user/appdata/roadie/`, then run `docker compose up -d` there.
+4. **Set `TZ`** in the compose file to your timezone. It controls when the 09:00 weekly digest fires.
+5. **Check the logs** for a `ready` line with the bot's name. Updating later is `docker compose pull && docker compose up -d` (or **Update stack** in the plugin).
+
+Keep `.env` on the server only: it holds your bot token, so don't put it in a share that other devices can read.
+
 ## Commands
 
 Config commands require the **Manage Server** permission.
@@ -134,6 +157,7 @@ Config commands require the **Manage Server** permission.
 | `/shows` returns nothing                                     | No `TICKETMASTER_API_KEY`, no genres added, or nothing listed in your radius. Check the logs for `provider failed` warnings.           |
 | `/roadie watch` says it needs `BANDSINTOWN_APP_ID`           | The bot owner hasn't set a Bandsintown key.                                                                                            |
 | HTTP 429 in the logs                                         | Ticketmaster rate limit hit. Raise `POLL_INTERVAL_MINUTES` or track fewer genres.                                                      |
+| Container exits with `unable to open database file`          | The data directory isn't writable by the container's user. Run `chown 99:100` (or your `user:` uid/gid) on the mounted directory.      |
 | `better-sqlite3` fails to install                            | Use Node 22 or newer. If no prebuilt binary exists for your platform, install a C++ toolchain so it can build from source.             |
 
 ## Adding a provider

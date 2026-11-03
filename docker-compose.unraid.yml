@@ -1,0 +1,24 @@
+# Unraid-oriented compose file: pulls the published image and keeps the
+# SQLite database in appdata so it is easy to find and back up.
+#
+# Setup (see README, "Running on Unraid"):
+#   mkdir -p /mnt/user/appdata/roadie/data
+#   chown 99:100 /mnt/user/appdata/roadie/data
+#   put your .env next to this file (e.g. /mnt/user/appdata/roadie/.env)
+services:
+  roadie:
+    image: ghcr.io/untraceablez/roadie:latest
+    container_name: roadie
+    restart: unless-stopped
+    # Unraid's "nobody:users", so files in appdata have the usual ownership.
+    user: "99:100"
+    env_file: .env
+    environment:
+      DATABASE_PATH: /data/roadie.db
+      TZ: America/Chicago # used for the 09:00 weekly digest; set to your timezone
+    volumes:
+      - /mnt/user/appdata/roadie/data:/data
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
