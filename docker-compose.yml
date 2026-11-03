@@ -1,5 +1,8 @@
+# Generic compose file: builds the image from this checkout, or pulls the
+# published one (`docker compose pull`). For Unraid see docker-compose.unraid.yml.
 services:
   roadie:
+    image: ghcr.io/untraceablez/roadie:latest
     build: .
     restart: unless-stopped
     env_file: .env
