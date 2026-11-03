@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/icon.png" alt="Roadie logo: an electric guitar" width="128" height="128">
+</p>
+
 # Roadie 🎸
 
 A self-hosted Discord bot that watches live-music listings and posts upcoming shows matching your server's genres into a channel you choose.
@@ -145,6 +149,12 @@ npm test
 npm run build
 ```
 
+## Credits
+
+<a href="https://www.flaticon.com/free-icons/electric-guitar" title="electric guitar icons">Electric guitar icons created by Magnific - Flaticon</a>
+
+The icon (`assets/icon.png`) is used under Flaticon's attribution license and is **not** covered by this project's MIT license.
+
 ## License
 
-MIT, see [LICENSE](LICENSE).
+MIT, see [LICENSE](LICENSE). This applies to the code, not to the icon above.
