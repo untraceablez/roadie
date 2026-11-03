@@ -50,6 +50,7 @@ Without a Ticketmaster key the bot starts but has nothing to search, so `/shows`
    - **Both scopes matter.** `bot` lets the bot join and post; `applications.commands` is what makes the slash commands show up. With `bot` alone, the bot connects but `/roadie` never appears.
    - `permissions=19456` is _View Channel_, _Send Messages_ and _Embed Links_, which is all the bot needs.
    - You need the **Manage Server** permission on the server you're inviting it to.
+   - You don't have to build the URL by hand: when the bot starts it logs a ready-made `invite link` line using your `DISCORD_CLIENT_ID`. Find it with `docker logs roadie | grep "invite link"` (Docker) or in the terminal output (`npm run dev`).
 
 ### 2. Ticketmaster API key
 

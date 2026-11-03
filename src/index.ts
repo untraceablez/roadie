@@ -4,6 +4,7 @@ import { handleCommand } from "./bot/commands.js";
 import type { AppContext } from "./bot/context.js";
 import { loadConfig } from "./config.js";
 import { Store } from "./db/index.js";
+import { buildInviteUrl } from "./invite.js";
 import { buildProviders } from "./providers/index.js";
 import { startScheduler } from "./scheduler.js";
 
@@ -22,6 +23,7 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 client.once(Events.ClientReady, (c) => {
   log.info({ user: c.user.tag, guilds: c.guilds.cache.size }, "ready");
+  log.info({ url: buildInviteUrl(config.DISCORD_CLIENT_ID) }, "invite link");
   startScheduler(client, ctx, log);
 });
 
