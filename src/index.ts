@@ -27,6 +27,10 @@ client.once(Events.ClientReady, (c) => {
 
 client.on(Events.InteractionCreate, (i) => {
   if (!i.isChatInputCommand()) return;
+  log.info(
+    { command: i.commandName, guild: i.guildId, user: i.user.tag },
+    "command received",
+  );
   handleCommand(i, ctx).catch(async (err) => {
     log.error({ err, command: i.commandName }, "command failed");
     const msg = { content: "Something went wrong.", ephemeral: true };
